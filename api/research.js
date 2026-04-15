@@ -54,7 +54,14 @@ ${context ? `Current Context (from Polymarket):\n${context}` : ''}`;
       );
 
       const geminiData = await geminiRes.json();
-      analysis = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemini';
+
+      // Surface actual API errors
+      if (geminiData.error) {
+        analysis = `Gemini API error: ${geminiData.error.message || JSON.stringify(geminiData.error)}`;
+      } else {
+        analysis = geminiData.candidates?.[0]?.content?.parts?.[0]?.text
+          || `Gemini returned unexpected structure: ${JSON.stringify(geminiData).slice(0, 300)}`;
+      }
 
     } else if (model === 'openai' && OPENAI_KEY) {
       const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {

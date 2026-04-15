@@ -260,16 +260,22 @@ const app = {
         body: JSON.stringify(payload),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        // Fallback: try direct LLM call from client
-        const analysis = await this.directResearch(payload);
-        content.innerHTML = this.formatResearch(analysis);
+        // Show the actual server error, and try direct as last resort
+        console.warn('Server API error:', data.error);
+        try {
+          const analysis = await this.directResearch(payload);
+          content.innerHTML = this.formatResearch(analysis);
+        } catch (fallbackErr) {
+          content.innerHTML = `<div class="empty-state"><p>Server error: ${data.error || 'Unknown'}</p><p class="muted">Direct fallback also failed: ${fallbackErr.message}</p></div>`;
+        }
       } else {
-        const data = await res.json();
         content.innerHTML = this.formatResearch(data.analysis);
       }
     } catch (err) {
-      // If API not available, try direct
+      // Network error — API route doesn't exist (local dev)
       try {
         const analysis = await this.directResearch(payload);
         content.innerHTML = this.formatResearch(analysis);

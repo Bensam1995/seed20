@@ -1,0 +1,11 @@
+{
+  "name": "seed20",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Polymarket prediction intelligence system",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site - no build step needed'"
+  },
+  "dependencies": {}
+}

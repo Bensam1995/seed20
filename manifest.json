@@ -1,0 +1,10 @@
+{
+  "name": "SEED·20",
+  "short_name": "SEED20",
+  "description": "Prediction market intelligence system",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a1e",
+  "theme_color": "#1a1a1e",
+  "icons": []
+}

@@ -1,0 +1,5 @@
+node_modules/
+.env
+.vercel/
+mockup_preview.html
+*.png

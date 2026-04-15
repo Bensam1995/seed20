@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a1a1e">
+  <meta name="description" content="SEED·20 — Prediction market intelligence system">
+  <title>SEED·20</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◈</text></svg>">
+</head>
+<body>
+  <!-- Top Bar -->
+  <header id="topbar">
+    <div class="topbar-left">
+      <span class="logo">SEED<span class="logo-dot">·</span>20</span>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="app.navigate('settings')" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="content">
+
+    <!-- ===== DASHBOARD VIEW ===== -->
+    <section id="view-dashboard" class="view">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Bankroll</div>
+          <div class="stat-value mono" id="stat-bankroll">$20.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Open Positions</div>
+          <div class="stat-value mono" id="stat-positions">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Win Rate</div>
+          <div class="stat-value mono" id="stat-winrate">—</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Daily Scanner</h2>
+          <button class="btn-ghost" onclick="app.runScan()" id="btn-scan">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Scan
+          </button>
+        </div>
+        <div id="scanner-results">
+          <div class="empty-state">
+            <p>No scan data yet</p>
+            <button class="btn-primary" onclick="app.runScan()">Run First Scan</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SCANNER VIEW ===== -->
+    <section id="view-scanner" class="view" style="display:none">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Market Scanner</h2>
+          <button class="btn-ghost" onclick="app.runScan()" id="btn-scan-full">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Refresh
+          </button>
+        </div>
+        <div class="filters-row">
+          <select id="filter-category" onchange="app.applyFilters()">
+            <option value="all">All Categories</option>
+            <option value="geopolitics">Geopolitics</option>
+            <option value="politics">Politics</option>
+            <option value="crypto">Crypto</option>
+            <option value="finance">Finance</option>
+            <option value="tech">Tech</option>
+          </select>
+          <select id="filter-sort" onchange="app.applyFilters()">
+            <option value="volume_24hr">24hr Volume</option>
+            <option value="competitive">Competitive</option>
+            <option value="volume">Total Volume</option>
+          </select>
+        </div>
+        <div id="scanner-full-results">
+          <div class="empty-state"><p>Run a scan to see markets</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== RESEARCH VIEW ===== -->
+    <section id="view-research" class="view" style="display:none">
+      <div class="breadcrumb">
+        <a href="#" onclick="app.navigate('scanner')">Scanner</a>
+        <span>›</span>
+        <span>Deep Research</span>
+      </div>
+
+      <div id="research-market-info" style="display:none">
+        <h1 id="research-question" class="research-title"></h1>
+        <div class="pills-row">
+          <span class="pill pill-green" id="research-price"></span>
+          <span class="pill pill-neutral" id="research-volume"></span>
+          <span class="pill pill-neutral" id="research-end"></span>
+        </div>
+      </div>
+
+      <div id="research-select" class="panel">
+        <label class="field-label">Enter market slug or select from scanner</label>
+        <div class="input-row">
+          <input type="text" id="research-slug" placeholder="e.g. starmer-out-in-2025" class="input-field">
+          <button class="btn-primary" onclick="app.loadMarketForResearch()">Load</button>
+        </div>
+      </div>
+
+      <div id="research-controls" style="display:none">
+        <div class="panel" style="padding: 16px 20px;">
+          <div class="model-selector">
+            <span class="field-label" style="margin-bottom:0">Analyze with:</span>
+            <label class="radio-label"><input type="radio" name="model" value="gemini" checked> Gemini Flash</label>
+            <label class="radio-label"><input type="radio" name="model" value="openai"> GPT-4o</label>
+          </div>
+        </div>
+        <button class="btn-primary btn-lg" onclick="app.runResearch()" id="btn-research">Run Deep Analysis</button>
+      </div>
+
+      <div id="research-output" class="panel research-output" style="display:none">
+        <div id="research-content"></div>
+      </div>
+    </section>
+
+    <!-- ===== JOURNAL VIEW ===== -->
+    <section id="view-journal" class="view" style="display:none">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Prediction Journal</h2>
+          <button class="btn-ghost" onclick="app.showAddPrediction()">+ Add</button>
+        </div>
+        <div id="journal-entries">
+          <div class="empty-state">
+            <p>No predictions logged yet</p>
+            <p class="muted">Start by running a scan and researching a market</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add Prediction Modal -->
+      <div id="modal-prediction" class="modal" style="display:none">
+        <div class="modal-content panel">
+          <h3>Log Prediction</h3>
+          <label class="field-label">Market</label>
+          <input type="text" id="pred-market" class="input-field" placeholder="Market question">
+          <label class="field-label">Position</label>
+          <div class="model-selector">
+            <label class="radio-label"><input type="radio" name="pred-position" value="yes" checked> Yes</label>
+            <label class="radio-label"><input type="radio" name="pred-position" value="no"> No</label>
+          </div>
+          <div class="input-row">
+            <div>
+              <label class="field-label">Entry Price (¢)</label>
+              <input type="number" id="pred-price" class="input-field" placeholder="35" min="1" max="99">
+            </div>
+            <div>
+              <label class="field-label">Size ($)</label>
+              <input type="number" id="pred-size" class="input-field" placeholder="5.00" min="0.5" step="0.5">
+            </div>
+          </div>
+          <div class="input-row">
+            <div>
+              <label class="field-label">System Confidence</label>
+              <input type="range" id="pred-sys-conf" min="0" max="100" value="50" class="range-input">
+              <span class="mono" id="pred-sys-conf-val">50%</span>
+            </div>
+            <div>
+              <label class="field-label">Your Confidence</label>
+              <input type="range" id="pred-user-conf" min="0" max="100" value="50" class="range-input">
+              <span class="mono" id="pred-user-conf-val">50%</span>
+            </div>
+          </div>
+          <label class="field-label">Rationale</label>
+          <textarea id="pred-rationale" class="input-field" rows="3" placeholder="Why this bet?"></textarea>
+          <div class="modal-actions">
+            <button class="btn-ghost" onclick="app.hideAddPrediction()">Cancel</button>
+            <button class="btn-primary" onclick="app.savePrediction()">Save</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SETTINGS VIEW ===== -->
+    <section id="view-settings" class="view" style="display:none">
+      <div class="panel">
+        <h2>Settings</h2>
+
+        <div class="settings-section">
+          <h3>API Keys</h3>
+          <p class="muted">Keys are stored as Vercel environment variables for security. For local dev, enter them below.</p>
+
+          <label class="field-label">Gemini API Key</label>
+          <input type="password" id="key-gemini" class="input-field" placeholder="AIza...">
+          <div class="key-status" id="status-gemini"></div>
+
+          <label class="field-label">OpenAI API Key</label>
+          <input type="password" id="key-openai" class="input-field" placeholder="sk-proj-...">
+          <div class="key-status" id="status-openai"></div>
+
+          <button class="btn-primary" onclick="app.saveKeys()" style="margin-top:12px">Save Keys</button>
+        </div>
+
+        <div class="settings-section">
+          <h3>Scanner Config</h3>
+          <label class="field-label">Minimum 24hr Volume ($)</label>
+          <input type="number" id="cfg-min-volume" class="input-field" value="10000">
+          <label class="field-label">Markets per scan</label>
+          <input type="number" id="cfg-limit" class="input-field" value="20" min="5" max="50">
+          <button class="btn-primary" onclick="app.saveConfig()" style="margin-top:12px">Save Config</button>
+        </div>
+
+        <div class="settings-section">
+          <h3>Ledger</h3>
+          <div class="input-row">
+            <div>
+              <label class="field-label">Seed Capital</label>
+              <input type="number" id="cfg-seed" class="input-field mono" value="20" step="0.5">
+            </div>
+            <div>
+              <label class="field-label">Current Bankroll</label>
+              <input type="number" id="cfg-bankroll" class="input-field mono" value="20" step="0.5">
+            </div>
+          </div>
+          <button class="btn-primary" onclick="app.saveLedger()" style="margin-top:12px">Update Ledger</button>
+        </div>
+
+        <div class="settings-section">
+          <h3>Data</h3>
+          <button class="btn-ghost" onclick="app.exportData()">Export All Data (JSON)</button>
+          <button class="btn-ghost btn-danger" onclick="app.clearData()">Clear All Data</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav id="navbar">
+    <button class="nav-btn active" data-view="dashboard" onclick="app.navigate('dashboard')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-btn" data-view="scanner" onclick="app.navigate('scanner')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>Scanner</span>
+    </button>
+    <button class="nav-btn" data-view="research" onclick="app.navigate('research')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <span>Research</span>
+    </button>
+    <button class="nav-btn" data-view="journal" onclick="app.navigate('journal')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Journal</span>
+    </button>
+    <button class="nav-btn" data-view="settings" onclick="app.navigate('settings')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <script src="/app.js"></script>
+</body>
+</html>

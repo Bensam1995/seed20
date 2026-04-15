@@ -111,7 +111,7 @@ const app = {
       return;
     }
 
-    const rows = data.map(ev => {
+    const rows = data.map((ev, idx) => {
       const market = this.getActiveMarket(ev);
       if (!market) return '';
 
@@ -121,8 +121,9 @@ const app = {
       const priceClass = price < 0.2 ? 'price-low' : price > 0.7 ? 'price-high' : 'price-mid';
       const trendClass = weekChange > 0.01 ? 'trend-up' : weekChange < -0.01 ? 'trend-down' : 'trend-flat';
       const trendIcon = weekChange > 0.01 ? '↗' : weekChange < -0.01 ? '↘' : '→';
+      const safeQuestion = (market.question || ev.title || '').replace(/"/g, '&quot;');
 
-      return `<tr onclick="app.openResearch('${ev.slug}', ${JSON.stringify(ev.title || market.question).replace(/'/g, "\\'")})" title="${market.question}">
+      return `<tr data-slug="${ev.slug}" title="${safeQuestion}">
         <td class="market-question">${market.question || ev.title}</td>
         <td><span class="price-pill ${priceClass}">${(price * 100).toFixed(0)}¢</span></td>
         <td class="vol">${vol24}</td>
@@ -135,6 +136,12 @@ const app = {
         <thead><tr><th>Market</th><th>Price</th><th>Vol 24h</th><th></th></tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
+
+    // Event delegation for row clicks
+    container.querySelector('tbody').addEventListener('click', (e) => {
+      const row = e.target.closest('tr[data-slug]');
+      if (row) app.openResearch(row.dataset.slug);
+    });
   },
 
   getActiveMarket(event) {
@@ -162,14 +169,11 @@ const app = {
   // ══════════════════════════════════════
   //  RESEARCH
   // ══════════════════════════════════════
-  openResearch(slug, title) {
+  openResearch(slug) {
     this.navigate('research');
     document.getElementById('research-slug').value = slug;
-    if (title) {
-      // Pre-fill from scan data
-      const ev = this.scanData.find(e => e.slug === slug);
-      if (ev) this.showMarketInfo(ev);
-    }
+    const ev = this.scanData.find(e => e.slug === slug);
+    if (ev) this.showMarketInfo(ev);
     this.loadMarketForResearch();
   },
 

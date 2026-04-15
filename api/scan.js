@@ -1,7 +1,7 @@
 // Vercel Serverless: GET /api/scan
 // Proxies Polymarket Gamma API to avoid CORS issues
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const { limit = '20', order = 'volume_24hr', tag_id } = req.query;
 
   let url = `https://gamma-api.polymarket.com/events?active=true&closed=false&order=${order}&ascending=false&limit=${limit}`;

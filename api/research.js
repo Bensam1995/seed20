@@ -48,7 +48,11 @@ ${context ? `Current Context (from Polymarket):\n${context}` : ''}`;
           body: JSON.stringify({
             system_instruction: { parts: [{ text: systemPrompt }] },
             contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 4000 },
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 4000,
+              thinkingConfig: { thinkingBudget: 0 },
+            },
           }),
         }
       );
@@ -59,7 +63,11 @@ ${context ? `Current Context (from Polymarket):\n${context}` : ''}`;
       if (geminiData.error) {
         analysis = `Gemini API error: ${geminiData.error.message || JSON.stringify(geminiData.error)}`;
       } else {
-        analysis = geminiData.candidates?.[0]?.content?.parts?.[0]?.text
+        // Extract text from all non-thought parts
+        const parts = geminiData.candidates?.[0]?.content?.parts || [];
+        const textParts = parts.filter(p => p.text && !p.thought).map(p => p.text);
+        analysis = textParts.join('\n') 
+          || parts.map(p => p.text).filter(Boolean).join('\n')
           || `Gemini returned unexpected structure: ${JSON.stringify(geminiData).slice(0, 300)}`;
       }
 

@@ -324,11 +324,14 @@ ${payload.context ? `Current Context (from Polymarket):\n${payload.context}` : '
         body: JSON.stringify({
           system_instruction: { parts: [{ text: systemPrompt }] },
           contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 4000 }
+          generationConfig: { temperature: 0.7, maxOutputTokens: 4000, thinkingConfig: { thinkingBudget: 0 } }
         }),
       });
       const data = await res.json();
-      return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response from Gemini';
+      if (data.error) throw new Error(`Gemini: ${data.error.message}`);
+      const parts = data.candidates?.[0]?.content?.parts || [];
+      const textParts = parts.filter(p => p.text && !p.thought).map(p => p.text);
+      return textParts.join('\n') || parts.map(p => p.text).filter(Boolean).join('\n') || 'No response from Gemini';
 
     } else if (model === 'openai' && keys.openai) {
       const res = await fetch('https://api.openai.com/v1/chat/completions', {

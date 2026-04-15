@@ -318,7 +318,7 @@ ${payload.description.slice(0, 1500)}
 ${payload.context ? `Current Context (from Polymarket):\n${payload.context}` : ''}`;
 
     if (model === 'gemini' && keys.gemini) {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${keys.gemini}`, {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${keys.gemini}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
